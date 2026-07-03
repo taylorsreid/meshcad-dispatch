@@ -1,13 +1,10 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
-	"os"
 	"slices"
 	"strconv"
 	"time"
@@ -58,7 +55,6 @@ var sentChunks = ttlcache.New(
 )
 
 func main() {
-
 	app = pocketbase.New()
 
 	migratecmd.MustRegister(app, app.RootCmd, migratecmd.Config{
@@ -68,42 +64,11 @@ func main() {
 	})
 
 	// hook to use numeric IDs
-	app.OnRecordCreateRequest("users").BindFunc(func(e *core.RecordRequestEvent) error {
-		nextIdRecord, err := app.FindFirstRecordByData("numericIds", "collection", e.Record.Collection().String())
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil // its not one of our collections that uses numeric IDs, just return and carry on
-		} else if err != nil {
-			return err // an actual error happened
-			// return nil
-		}
+	app.OnRecordCreateExecute("users", "incidents", "incidentEvents").BindFunc(useNumericIds)
 
-		e.Record.Set("id", nextIdRecord.GetString("nextId"))
-		// err = app.Save(e.Record)
-		// if err != nil {
-		// 	return err
-		// }
-
-		nextIdRecord.Set("nextId", nextIdRecord.GetInt("nextId")+1)
-		err = app.Save(nextIdRecord)
-		if err != nil {
-			return err
-		}
-
-		return e.Next()
-	})
-
+	// TODO: REFACTOR RADIO TO NOT USE DB
 	// hook to restart the radio if selected db radio record is changed
-	app.OnRecordAfterUpdateSuccess("radios").BindFunc(func(e *core.RecordEvent) error {
-		if e.Record.GetBool("selected") {
-			radio.Close()
-			radioRunning = false
-			err := startRadio()
-			if err != nil {
-				log.Println("FAILED TO RESTART RADIO: " + err.Error()) // log but don't panic because server can still run without a radio
-			}
-		}
-		return e.Next()
-	})
+	app.OnRecordAfterUpdateSuccess("radios").BindFunc(restartRadioOnUpdate)
 
 	// Hook to send update via radio to users assigned to this incident. IP users will subscribe from the client side so no hook is necessary for them.
 	app.OnRecordAfterUpdateSuccess("incidents").BindFunc(func(e *core.RecordEvent) error {
@@ -112,66 +77,14 @@ func main() {
 		return e.Next()
 	})
 
-	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
-		logFile, err := os.OpenFile("server.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err == nil {
-			log.SetOutput(logFile)
-		} // else we'll just write to stdErr
-
-		// load up the reusable collection objects
-		userCollection, err = app.FindCollectionByNameOrId("users")
-		if err != nil {
-			return err
-		}
-		incidentCollection, err = app.FindCollectionByNameOrId("incidents")
-		if err != nil {
-			return err
-		}
-		incidentEventCollection, err = app.FindCachedCollectionByNameOrId("incidentEvents")
-		if err != nil {
-			return err
-		}
-
-		go usedMeshPacketIds.Start()
-
-		err = startRadio()
-		if err != nil {
-			log.Println("FAILED TO START RADIO: " + err.Error()) // log but don't panic because server can still run without a radio
-		}
-
-		// routes in addition to standard CRUD routes
-		se.Router.GET("/api/healthRadio", func(e *core.RequestEvent) error {
-			return e.JSON(http.StatusOK, map[string]any{
-				"myInfo": myInfo,
-				"info":   nodeInfo,
-				"config": config,
-			})
-		}) //.Bind(apis.RequireAuth()) // TODO: reenable auth for prod
-
-		r, err := app.FindFirstRecordByData("roles", "name", "Dispatcher")
-		if err != nil {
-			return err
-		}
-
-		t := core.NewRecord(userCollection)
-		t.SetEmail("demouser@example.com")
-		t.SetPassword("password12")
-		t.SetVerified(true)
-		t.Set("name", "demo user")
-		t.Set("roles", []string{r.Id})
-		t.Set("status", "offline")
-		if err := app.Save(t); err != nil {
-			return err
-		}
-
-		return se.Next()
-	})
+	app.OnServe().BindFunc(onServe)
 
 	if err := app.Start(); err != nil {
 		log.Fatal(err)
 	}
 }
 
+// TODO: REFACTOR RADIO TO NOT USE DB
 func startRadio() error {
 
 	// retrieve selected radio info from db
@@ -232,14 +145,6 @@ func startRadio() error {
 	return nil
 }
 
-// func getUnusedMeshPacketId() uint32 {
-// 	r := rand.Uint32()
-// 	if usedMeshPacketIds.Has(r) {
-// 		return getUnusedMeshPacketId()
-// 	}
-// 	return r
-// }
-
 func sendPayload(to uint32, convoId uint32, payload *meshcadprotos.Payload) {
 	// make the payload into bytes
 	bytes, err := proto.Marshal(payload)
@@ -295,6 +200,32 @@ func sendPayload(to uint32, convoId uint32, payload *meshcadprotos.Payload) {
 	}
 }
 
+func hasPermissionTo(meshAddress uint32, permissionString string) bool {
+	user, err := app.FindFirstRecordByData(userCollection, "meshAddress", meshAddress)
+	if err != nil {
+		log.Printf("ERROR CHECKING PERMISSIONS: %s\n", err)
+		return false
+	}
+	errs := app.ExpandRecord(user, []string{"roles"}, nil)
+	if len(errs) > 0 {
+		log.Printf("ERROR CHECKING PERMISSIONS: %s\n", errs)
+		return false
+	}
+	for _, role := range user.ExpandedAll("roles") {
+		errs := app.ExpandRecord(role, []string{"permissions"}, nil)
+		if len(errs) > 0 {
+			log.Printf("ERROR CHECKING PERMISSIONS: %s\n", errs)
+			return false
+		}
+		for _, permission := range role.ExpandedAll("permissions") {
+			if permission.GetString("name") == permissionString {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func packetHandler(fromRadio *gomeshproto.FromRadio) {
 	// if fromRadio == nil { // TODO: do we need this? test it
 	// 	return
@@ -308,7 +239,7 @@ func packetHandler(fromRadio *gomeshproto.FromRadio) {
 			chunk := &meshcadprotos.MeshcadChunk{}
 			err := proto.Unmarshal(d.Decoded.GetPayload(), chunk)
 			if err != nil {
-				log.Println("UNMARSHALING ERROR - MESHCADCHUNK: " + err.Error()) // it's probably not an MeshcadChunk, log it for now
+				log.Println("UNMARSHALING ERROR - MESHCADCHUNK: " + err.Error()) // it's probably not a MeshcadChunk, log it for now
 				return
 			}
 
@@ -369,8 +300,8 @@ func packetHandler(fromRadio *gomeshproto.FromRadio) {
 				user.SetEmail(request.CreateUser.Email)
 				user.SetPassword(request.CreateUser.Password)
 				user.Set("name", request.CreateUser.Name)
-
 				err := app.Save(user)
+
 				if err != nil {
 					errStr := err.Error()
 					log.Println("ERROR CREATING USER: " + errStr)
@@ -394,15 +325,8 @@ func packetHandler(fromRadio *gomeshproto.FromRadio) {
 					},
 				})
 			case *meshcadprotos.Payload_CreateIncident:
-				// TODO: add authorization here
-
-				incident := core.NewRecord(incidentCollection)
-				incident.Set("incidentType", request.CreateIncident.IncidentType)
-				incident.Set("coordinates", types.GeoPoint{Lat: *request.CreateIncident.Latitude, Lon: *request.CreateIncident.Longitude})
-				incident.Set("address", request.CreateIncident.Address)
-				incident.Set("sentAt", payload.Timestamp)
-
 				createdBy, err := app.FindFirstRecordByData(userCollection, "meshAddress", pv.Packet.From)
+
 				if err != nil {
 					errStr := fmt.Sprintf("ERROR CREATING INCIDENT, COULD NOT FIND USER ASSOCIATED WITH MESH ADDRESS \"%d\": %s", pv.Packet.From, err.Error())
 					log.Println(errStr)
@@ -416,16 +340,35 @@ func packetHandler(fromRadio *gomeshproto.FromRadio) {
 					})
 					return
 				}
-				incident.Set("createdBy", createdBy)
 
+				if !hasPermissionTo(pv.Packet.From, "create incidents") {
+					log.Printf("401: USER WITH ID %s IS NOT AUTHORIZED TO CREATE INCIDENTS.\n", createdBy.Id)
+					sendPayload(pv.Packet.From, chunk.Id, &meshcadprotos.Payload{
+						Payload: &meshcadprotos.Payload_Response{
+							Response: &meshcadprotos.Response{
+								Status:  401,
+								Payload: nil,
+							},
+						},
+					})
+					return
+				}
+
+				incident := core.NewRecord(incidentCollection)
+				incident.Set("incidentType", request.CreateIncident.IncidentType)
+				incident.Set("coordinates", types.GeoPoint{Lat: *request.CreateIncident.Latitude, Lon: *request.CreateIncident.Longitude})
+				incident.Set("address", request.CreateIncident.Address)
+				incident.Set("sentAt", payload.Timestamp)
+				incident.Set("createdBy", createdBy)
 				err = app.Save(incident)
+
 				if err != nil {
 					errStr := err.Error()
 					log.Println("ERROR CREATING INCIDENT: " + errStr)
 					sendPayload(pv.Packet.From, chunk.Id, &meshcadprotos.Payload{
 						Payload: &meshcadprotos.Payload_Response{
 							Response: &meshcadprotos.Response{
-								Status:  400,
+								Status:  500,
 								Payload: &errStr,
 							},
 						},
@@ -442,17 +385,10 @@ func packetHandler(fromRadio *gomeshproto.FromRadio) {
 					},
 				})
 			case *meshcadprotos.Payload_CreateIncidentEvent:
-				// TODO: add authorization here
-
-				ie := core.NewRecord(incidentEventCollection)
-				ie.Set("title", request.CreateIncidentEvent.Title)
-				ie.Set("details", request.CreateIncidentEvent.Details)
-				ie.Set("sentAt", payload.Timestamp)
-				ie.Set("affectedUser", request.CreateIncidentEvent.AffectedUser)
-
 				createdBy, err := app.FindFirstRecordByData(userCollection, "meshAddress", pv.Packet.From)
+
 				if err != nil {
-					errStr := fmt.Sprintf("ERROR CREATING INCIDENT, COULD NOT FIND USER ASSOCIATED WITH MESH ADDRESS \"%d\": %s", pv.Packet.From, err.Error())
+					errStr := fmt.Sprintf("ERROR CREATING INCIDENT EVENT, COULD NOT FIND USER ASSOCIATED WITH MESH ADDRESS \"%d\": %s", pv.Packet.From, err.Error())
 					log.Println(errStr)
 					sendPayload(pv.Packet.From, chunk.Id, &meshcadprotos.Payload{
 						Payload: &meshcadprotos.Payload_Response{
@@ -464,9 +400,28 @@ func packetHandler(fromRadio *gomeshproto.FromRadio) {
 					})
 					return
 				}
-				ie.Set("createdBy", createdBy)
 
+				if !hasPermissionTo(pv.Packet.From, "create incidentEvents") {
+					log.Printf("401: USER WITH ID %s IS NOT AUTHORIZED TO CREATE INCIDENTEVENTS.\n", createdBy.Id)
+					sendPayload(pv.Packet.From, chunk.Id, &meshcadprotos.Payload{
+						Payload: &meshcadprotos.Payload_Response{
+							Response: &meshcadprotos.Response{
+								Status:  401,
+								Payload: nil,
+							},
+						},
+					})
+					return
+				}
+
+				ie := core.NewRecord(incidentEventCollection)
+				ie.Set("title", request.CreateIncidentEvent.Title)
+				ie.Set("details", request.CreateIncidentEvent.Details)
+				ie.Set("sentAt", payload.Timestamp)
+				ie.Set("affectedUser", request.CreateIncidentEvent.AffectedUser)
+				ie.Set("createdBy", createdBy)
 				err = app.Save(ie)
+
 				if err != nil {
 					errStr := err.Error()
 					log.Println("ERROR CREATING INCIDENTEVENT: " + errStr)
@@ -490,9 +445,19 @@ func packetHandler(fromRadio *gomeshproto.FromRadio) {
 					},
 				})
 			case *meshcadprotos.Payload_Read:
-				// TODO: add authorization here
-
 				if request.Read.Multiple {
+					if !hasPermissionTo(pv.Packet.From, fmt.Sprintf("list %s", request.Read.Collection)) {
+						sendPayload(pv.Packet.From, chunk.Id, &meshcadprotos.Payload{
+							Payload: &meshcadprotos.Payload_Response{
+								Response: &meshcadprotos.Response{
+									Status:  401,
+									Payload: nil,
+								},
+							},
+						})
+						return
+					}
+
 					results, err := app.FindRecordsByFilter(
 						request.Read.Collection.String(),
 						*request.Read.Filter,
@@ -500,13 +465,14 @@ func packetHandler(fromRadio *gomeshproto.FromRadio) {
 						int(*request.Read.Limit),
 						int(*request.Read.Offset),
 					)
+
 					if err != nil {
 						errStr := err.Error()
 						log.Println("ERROR READING: " + errStr)
 						sendPayload(pv.Packet.From, chunk.Id, &meshcadprotos.Payload{
 							Payload: &meshcadprotos.Payload_Response{
 								Response: &meshcadprotos.Response{
-									Status:  400,
+									Status:  500,
 									Payload: &errStr,
 								},
 							},
@@ -537,7 +503,50 @@ func packetHandler(fromRadio *gomeshproto.FromRadio) {
 							},
 						},
 					})
+					return
 				}
+
+				if !hasPermissionTo(pv.Packet.From, fmt.Sprintf("view %s", request.Read.Collection)) {
+					sendPayload(pv.Packet.From, chunk.Id, &meshcadprotos.Payload{
+						Payload: &meshcadprotos.Payload_Response{
+							Response: &meshcadprotos.Response{
+								Status:  401,
+								Payload: nil,
+							},
+						},
+					})
+					return
+				}
+
+				result, err := app.FindFirstRecordByFilter(
+					request.Read.Collection.String(),
+					*request.Read.Filter,
+				)
+
+				if err != nil {
+					errStr := err.Error()
+					log.Println("ERROR READING: " + errStr)
+					sendPayload(pv.Packet.From, chunk.Id, &meshcadprotos.Payload{
+						Payload: &meshcadprotos.Payload_Response{
+							Response: &meshcadprotos.Response{
+								Status:  500,
+								Payload: &errStr,
+							},
+						},
+					})
+					return
+				}
+
+				resultJson, err := json.Marshal(result)
+				resultStr := string(resultJson)
+				sendPayload(pv.Packet.From, chunk.Id, &meshcadprotos.Payload{
+					Payload: &meshcadprotos.Payload_Response{
+						Response: &meshcadprotos.Response{
+							Status:  200,
+							Payload: &resultStr,
+						},
+					},
+				})
 
 			case *meshcadprotos.Payload_UpdateUser:
 				requestor, err := app.FindFirstRecordByData(userCollection, "meshAddress", pv.Packet.From)

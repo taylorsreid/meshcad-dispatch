@@ -3,7 +3,12 @@ syntax = "proto3";
 // Go package name
 option go_package = "../meshcadprotos"; 
 
-import "collection.proto";
+enum Collection {
+    unknown_collection = 0;
+    users = 1;
+    incidents = 2;
+    incidentEvents = 3;
+}
 
 message Read {
     bool multiple = 1;

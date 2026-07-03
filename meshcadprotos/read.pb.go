@@ -21,6 +21,58 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type Collection int32
+
+const (
+	Collection_unknown_collection Collection = 0
+	Collection_users              Collection = 1
+	Collection_incidents          Collection = 2
+	Collection_incidentEvents     Collection = 3
+)
+
+// Enum value maps for Collection.
+var (
+	Collection_name = map[int32]string{
+		0: "unknown_collection",
+		1: "users",
+		2: "incidents",
+		3: "incidentEvents",
+	}
+	Collection_value = map[string]int32{
+		"unknown_collection": 0,
+		"users":              1,
+		"incidents":          2,
+		"incidentEvents":     3,
+	}
+)
+
+func (x Collection) Enum() *Collection {
+	p := new(Collection)
+	*p = x
+	return p
+}
+
+func (x Collection) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (Collection) Descriptor() protoreflect.EnumDescriptor {
+	return file_read_proto_enumTypes[0].Descriptor()
+}
+
+func (Collection) Type() protoreflect.EnumType {
+	return &file_read_proto_enumTypes[0]
+}
+
+func (x Collection) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use Collection.Descriptor instead.
+func (Collection) EnumDescriptor() ([]byte, []int) {
+	return file_read_proto_rawDescGZIP(), []int{0}
+}
+
 type Read struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Multiple      bool                   `protobuf:"varint,1,opt,name=multiple,proto3" json:"multiple,omitempty"`
@@ -74,7 +126,7 @@ func (x *Read) GetCollection() Collection {
 	if x != nil {
 		return x.Collection
 	}
-	return Collection_unknown
+	return Collection_unknown_collection
 }
 
 func (x *Read) GetFilter() string {
@@ -110,7 +162,7 @@ var File_read_proto protoreflect.FileDescriptor
 const file_read_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"read.proto\x1a\x10collection.proto\"\xe6\x01\n" +
+	"read.proto\"\xe6\x01\n" +
 	"\x04Read\x12\x1a\n" +
 	"\bmultiple\x18\x01 \x01(\bR\bmultiple\x12+\n" +
 	"\n" +
@@ -123,7 +175,13 @@ const file_read_proto_rawDesc = "" +
 	"\a_filterB\a\n" +
 	"\x05_sortB\b\n" +
 	"\x06_limitB\t\n" +
-	"\a_offsetB\x12Z\x10../meshcadprotosb\x06proto3"
+	"\a_offset*R\n" +
+	"\n" +
+	"Collection\x12\x16\n" +
+	"\x12unknown_collection\x10\x00\x12\t\n" +
+	"\x05users\x10\x01\x12\r\n" +
+	"\tincidents\x10\x02\x12\x12\n" +
+	"\x0eincidentEvents\x10\x03B\x12Z\x10../meshcadprotosb\x06proto3"
 
 var (
 	file_read_proto_rawDescOnce sync.Once
@@ -137,13 +195,14 @@ func file_read_proto_rawDescGZIP() []byte {
 	return file_read_proto_rawDescData
 }
 
+var file_read_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_read_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_read_proto_goTypes = []any{
-	(*Read)(nil),    // 0: Read
-	(Collection)(0), // 1: Collection
+	(Collection)(0), // 0: Collection
+	(*Read)(nil),    // 1: Read
 }
 var file_read_proto_depIdxs = []int32{
-	1, // 0: Read.collection:type_name -> Collection
+	0, // 0: Read.collection:type_name -> Collection
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -156,20 +215,20 @@ func file_read_proto_init() {
 	if File_read_proto != nil {
 		return
 	}
-	file_collection_proto_init()
 	file_read_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_read_proto_rawDesc), len(file_read_proto_rawDesc)),
-			NumEnums:      0,
+			NumEnums:      1,
 			NumMessages:   1,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_read_proto_goTypes,
 		DependencyIndexes: file_read_proto_depIdxs,
+		EnumInfos:         file_read_proto_enumTypes,
 		MessageInfos:      file_read_proto_msgTypes,
 	}.Build()
 	File_read_proto = out.File

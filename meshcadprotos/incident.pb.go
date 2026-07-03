@@ -21,22 +21,144 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type AssignmentModifier int32
+
+const (
+	AssignmentModifier_unknown_assignmentModifier AssignmentModifier = 0
+	AssignmentModifier_set                        AssignmentModifier = 1
+	AssignmentModifier_add                        AssignmentModifier = 2
+	AssignmentModifier_remove                     AssignmentModifier = 3
+)
+
+// Enum value maps for AssignmentModifier.
+var (
+	AssignmentModifier_name = map[int32]string{
+		0: "unknown_assignmentModifier",
+		1: "set",
+		2: "add",
+		3: "remove",
+	}
+	AssignmentModifier_value = map[string]int32{
+		"unknown_assignmentModifier": 0,
+		"set":                        1,
+		"add":                        2,
+		"remove":                     3,
+	}
+)
+
+func (x AssignmentModifier) Enum() *AssignmentModifier {
+	p := new(AssignmentModifier)
+	*p = x
+	return p
+}
+
+func (x AssignmentModifier) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (AssignmentModifier) Descriptor() protoreflect.EnumDescriptor {
+	return file_incident_proto_enumTypes[0].Descriptor()
+}
+
+func (AssignmentModifier) Type() protoreflect.EnumType {
+	return &file_incident_proto_enumTypes[0]
+}
+
+func (x AssignmentModifier) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use AssignmentModifier.Descriptor instead.
+func (AssignmentModifier) EnumDescriptor() ([]byte, []int) {
+	return file_incident_proto_rawDescGZIP(), []int{0}
+}
+
+type IncidentUser struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	MeshAddress   uint32                 `protobuf:"varint,2,opt,name=meshAddress,proto3" json:"meshAddress,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Role          string                 `protobuf:"bytes,4,opt,name=role,proto3" json:"role,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IncidentUser) Reset() {
+	*x = IncidentUser{}
+	mi := &file_incident_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IncidentUser) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IncidentUser) ProtoMessage() {}
+
+func (x *IncidentUser) ProtoReflect() protoreflect.Message {
+	mi := &file_incident_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IncidentUser.ProtoReflect.Descriptor instead.
+func (*IncidentUser) Descriptor() ([]byte, []int) {
+	return file_incident_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *IncidentUser) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *IncidentUser) GetMeshAddress() uint32 {
+	if x != nil {
+		return x.MeshAddress
+	}
+	return 0
+}
+
+func (x *IncidentUser) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *IncidentUser) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
 type CreateIncident struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            *uint32                `protobuf:"varint,1,opt,name=id,proto3,oneof" json:"id,omitempty"`
 	IncidentType  string                 `protobuf:"bytes,2,opt,name=incidentType,proto3" json:"incidentType,omitempty"`
-	Priority      uint32                 `protobuf:"varint,3,opt,name=priority,proto3" json:"priority,omitempty"`
+	Priority      *uint32                `protobuf:"varint,3,opt,name=priority,proto3,oneof" json:"priority,omitempty"`
 	Latitude      *float64               `protobuf:"fixed64,4,opt,name=latitude,proto3,oneof" json:"latitude,omitempty"`
 	Longitude     *float64               `protobuf:"fixed64,5,opt,name=longitude,proto3,oneof" json:"longitude,omitempty"`
 	Address       *string                `protobuf:"bytes,6,opt,name=address,proto3,oneof" json:"address,omitempty"`
-	CreatedBy     *string                `protobuf:"bytes,7,opt,name=createdBy,proto3,oneof" json:"createdBy,omitempty"`
+	VoiceChannel  *string                `protobuf:"bytes,7,opt,name=voiceChannel,proto3,oneof" json:"voiceChannel,omitempty"`
+	CreatedBy     *string                `protobuf:"bytes,8,opt,name=createdBy,proto3,oneof" json:"createdBy,omitempty"`
+	IncidentUsers []*IncidentUser        `protobuf:"bytes,9,rep,name=incidentUsers,proto3" json:"incidentUsers,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateIncident) Reset() {
 	*x = CreateIncident{}
-	mi := &file_incident_proto_msgTypes[0]
+	mi := &file_incident_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -48,7 +170,7 @@ func (x *CreateIncident) String() string {
 func (*CreateIncident) ProtoMessage() {}
 
 func (x *CreateIncident) ProtoReflect() protoreflect.Message {
-	mi := &file_incident_proto_msgTypes[0]
+	mi := &file_incident_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -61,7 +183,7 @@ func (x *CreateIncident) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateIncident.ProtoReflect.Descriptor instead.
 func (*CreateIncident) Descriptor() ([]byte, []int) {
-	return file_incident_proto_rawDescGZIP(), []int{0}
+	return file_incident_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *CreateIncident) GetId() uint32 {
@@ -79,8 +201,8 @@ func (x *CreateIncident) GetIncidentType() string {
 }
 
 func (x *CreateIncident) GetPriority() uint32 {
-	if x != nil {
-		return x.Priority
+	if x != nil && x.Priority != nil {
+		return *x.Priority
 	}
 	return 0
 }
@@ -106,6 +228,13 @@ func (x *CreateIncident) GetAddress() string {
 	return ""
 }
 
+func (x *CreateIncident) GetVoiceChannel() string {
+	if x != nil && x.VoiceChannel != nil {
+		return *x.VoiceChannel
+	}
+	return ""
+}
+
 func (x *CreateIncident) GetCreatedBy() string {
 	if x != nil && x.CreatedBy != nil {
 		return *x.CreatedBy
@@ -113,21 +242,31 @@ func (x *CreateIncident) GetCreatedBy() string {
 	return ""
 }
 
+func (x *CreateIncident) GetIncidentUsers() []*IncidentUser {
+	if x != nil {
+		return x.IncidentUsers
+	}
+	return nil
+}
+
 type UpdateIncident struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	IncidentType  *string                `protobuf:"bytes,2,opt,name=incidentType,proto3,oneof" json:"incidentType,omitempty"`
-	Priority      *uint32                `protobuf:"varint,3,opt,name=priority,proto3,oneof" json:"priority,omitempty"`
-	Latitude      *float64               `protobuf:"fixed64,4,opt,name=latitude,proto3,oneof" json:"latitude,omitempty"`
-	Longitude     *float64               `protobuf:"fixed64,5,opt,name=longitude,proto3,oneof" json:"longitude,omitempty"`
-	Address       *string                `protobuf:"bytes,6,opt,name=address,proto3,oneof" json:"address,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Id                 uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	IncidentType       *string                `protobuf:"bytes,2,opt,name=incidentType,proto3,oneof" json:"incidentType,omitempty"`
+	Priority           *uint32                `protobuf:"varint,3,opt,name=priority,proto3,oneof" json:"priority,omitempty"`
+	Latitude           *float64               `protobuf:"fixed64,4,opt,name=latitude,proto3,oneof" json:"latitude,omitempty"`
+	Longitude          *float64               `protobuf:"fixed64,5,opt,name=longitude,proto3,oneof" json:"longitude,omitempty"`
+	Address            *string                `protobuf:"bytes,6,opt,name=address,proto3,oneof" json:"address,omitempty"`
+	VoiceChannel       *string                `protobuf:"bytes,7,opt,name=voiceChannel,proto3,oneof" json:"voiceChannel,omitempty"`
+	AssignmentModifier *AssignmentModifier    `protobuf:"varint,8,opt,name=assignmentModifier,proto3,enum=AssignmentModifier,oneof" json:"assignmentModifier,omitempty"`
+	IncidentUsers      []*IncidentUser        `protobuf:"bytes,9,rep,name=incidentUsers,proto3" json:"incidentUsers,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *UpdateIncident) Reset() {
 	*x = UpdateIncident{}
-	mi := &file_incident_proto_msgTypes[1]
+	mi := &file_incident_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -139,7 +278,7 @@ func (x *UpdateIncident) String() string {
 func (*UpdateIncident) ProtoMessage() {}
 
 func (x *UpdateIncident) ProtoReflect() protoreflect.Message {
-	mi := &file_incident_proto_msgTypes[1]
+	mi := &file_incident_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -152,7 +291,7 @@ func (x *UpdateIncident) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateIncident.ProtoReflect.Descriptor instead.
 func (*UpdateIncident) Descriptor() ([]byte, []int) {
-	return file_incident_proto_rawDescGZIP(), []int{1}
+	return file_incident_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UpdateIncident) GetId() uint32 {
@@ -197,41 +336,82 @@ func (x *UpdateIncident) GetAddress() string {
 	return ""
 }
 
+func (x *UpdateIncident) GetVoiceChannel() string {
+	if x != nil && x.VoiceChannel != nil {
+		return *x.VoiceChannel
+	}
+	return ""
+}
+
+func (x *UpdateIncident) GetAssignmentModifier() AssignmentModifier {
+	if x != nil && x.AssignmentModifier != nil {
+		return *x.AssignmentModifier
+	}
+	return AssignmentModifier_unknown_assignmentModifier
+}
+
+func (x *UpdateIncident) GetIncidentUsers() []*IncidentUser {
+	if x != nil {
+		return x.IncidentUsers
+	}
+	return nil
+}
+
 var File_incident_proto protoreflect.FileDescriptor
 
 const file_incident_proto_rawDesc = "" +
 	"\n" +
-	"\x0eincident.proto\"\xa7\x02\n" +
+	"\x0eincident.proto\"h\n" +
+	"\fIncidentUser\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\rR\x02id\x12 \n" +
+	"\vmeshAddress\x18\x02 \x01(\rR\vmeshAddress\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12\x12\n" +
+	"\x04role\x18\x04 \x01(\tR\x04role\"\xa8\x03\n" +
 	"\x0eCreateIncident\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\rH\x00R\x02id\x88\x01\x01\x12\"\n" +
-	"\fincidentType\x18\x02 \x01(\tR\fincidentType\x12\x1a\n" +
-	"\bpriority\x18\x03 \x01(\rR\bpriority\x12\x1f\n" +
-	"\blatitude\x18\x04 \x01(\x01H\x01R\blatitude\x88\x01\x01\x12!\n" +
-	"\tlongitude\x18\x05 \x01(\x01H\x02R\tlongitude\x88\x01\x01\x12\x1d\n" +
-	"\aaddress\x18\x06 \x01(\tH\x03R\aaddress\x88\x01\x01\x12!\n" +
-	"\tcreatedBy\x18\a \x01(\tH\x04R\tcreatedBy\x88\x01\x01B\x05\n" +
+	"\fincidentType\x18\x02 \x01(\tR\fincidentType\x12\x1f\n" +
+	"\bpriority\x18\x03 \x01(\rH\x01R\bpriority\x88\x01\x01\x12\x1f\n" +
+	"\blatitude\x18\x04 \x01(\x01H\x02R\blatitude\x88\x01\x01\x12!\n" +
+	"\tlongitude\x18\x05 \x01(\x01H\x03R\tlongitude\x88\x01\x01\x12\x1d\n" +
+	"\aaddress\x18\x06 \x01(\tH\x04R\aaddress\x88\x01\x01\x12'\n" +
+	"\fvoiceChannel\x18\a \x01(\tH\x05R\fvoiceChannel\x88\x01\x01\x12!\n" +
+	"\tcreatedBy\x18\b \x01(\tH\x06R\tcreatedBy\x88\x01\x01\x123\n" +
+	"\rincidentUsers\x18\t \x03(\v2\r.IncidentUserR\rincidentUsersB\x05\n" +
 	"\x03_idB\v\n" +
+	"\t_priorityB\v\n" +
 	"\t_latitudeB\f\n" +
 	"\n" +
 	"_longitudeB\n" +
 	"\n" +
-	"\b_addressB\f\n" +
+	"\b_addressB\x0f\n" +
+	"\r_voiceChannelB\f\n" +
 	"\n" +
-	"_createdBy\"\x92\x02\n" +
+	"_createdBy\"\xe2\x03\n" +
 	"\x0eUpdateIncident\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x12'\n" +
 	"\fincidentType\x18\x02 \x01(\tH\x00R\fincidentType\x88\x01\x01\x12\x1f\n" +
 	"\bpriority\x18\x03 \x01(\rH\x01R\bpriority\x88\x01\x01\x12\x1f\n" +
 	"\blatitude\x18\x04 \x01(\x01H\x02R\blatitude\x88\x01\x01\x12!\n" +
 	"\tlongitude\x18\x05 \x01(\x01H\x03R\tlongitude\x88\x01\x01\x12\x1d\n" +
-	"\aaddress\x18\x06 \x01(\tH\x04R\aaddress\x88\x01\x01B\x0f\n" +
+	"\aaddress\x18\x06 \x01(\tH\x04R\aaddress\x88\x01\x01\x12'\n" +
+	"\fvoiceChannel\x18\a \x01(\tH\x05R\fvoiceChannel\x88\x01\x01\x12H\n" +
+	"\x12assignmentModifier\x18\b \x01(\x0e2\x13.AssignmentModifierH\x06R\x12assignmentModifier\x88\x01\x01\x123\n" +
+	"\rincidentUsers\x18\t \x03(\v2\r.IncidentUserR\rincidentUsersB\x0f\n" +
 	"\r_incidentTypeB\v\n" +
 	"\t_priorityB\v\n" +
 	"\t_latitudeB\f\n" +
 	"\n" +
 	"_longitudeB\n" +
 	"\n" +
-	"\b_addressB\x12Z\x10../meshcadprotosb\x06proto3"
+	"\b_addressB\x0f\n" +
+	"\r_voiceChannelB\x15\n" +
+	"\x13_assignmentModifier*R\n" +
+	"\x12AssignmentModifier\x12\x1e\n" +
+	"\x1aunknown_assignmentModifier\x10\x00\x12\a\n" +
+	"\x03set\x10\x01\x12\a\n" +
+	"\x03add\x10\x02\x12\n" +
+	"\n" +
+	"\x06remove\x10\x03B\x12Z\x10../meshcadprotosb\x06proto3"
 
 var (
 	file_incident_proto_rawDescOnce sync.Once
@@ -245,17 +425,23 @@ func file_incident_proto_rawDescGZIP() []byte {
 	return file_incident_proto_rawDescData
 }
 
-var file_incident_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_incident_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_incident_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_incident_proto_goTypes = []any{
-	(*CreateIncident)(nil), // 0: CreateIncident
-	(*UpdateIncident)(nil), // 1: UpdateIncident
+	(AssignmentModifier)(0), // 0: AssignmentModifier
+	(*IncidentUser)(nil),    // 1: IncidentUser
+	(*CreateIncident)(nil),  // 2: CreateIncident
+	(*UpdateIncident)(nil),  // 3: UpdateIncident
 }
 var file_incident_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	1, // 0: CreateIncident.incidentUsers:type_name -> IncidentUser
+	0, // 1: UpdateIncident.assignmentModifier:type_name -> AssignmentModifier
+	1, // 2: UpdateIncident.incidentUsers:type_name -> IncidentUser
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_incident_proto_init() }
@@ -263,20 +449,21 @@ func file_incident_proto_init() {
 	if File_incident_proto != nil {
 		return
 	}
-	file_incident_proto_msgTypes[0].OneofWrappers = []any{}
 	file_incident_proto_msgTypes[1].OneofWrappers = []any{}
+	file_incident_proto_msgTypes[2].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_incident_proto_rawDesc), len(file_incident_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   2,
+			NumEnums:      1,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_incident_proto_goTypes,
 		DependencyIndexes: file_incident_proto_depIdxs,
+		EnumInfos:         file_incident_proto_enumTypes,
 		MessageInfos:      file_incident_proto_msgTypes,
 	}.Build()
 	File_incident_proto = out.File

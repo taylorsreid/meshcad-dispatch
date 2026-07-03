@@ -4,17 +4,12 @@ syntax = "proto3";
 option go_package = "../meshcadprotos";
 
 message CreateIncidentEvent {
-    optional uint32 id = 1;
-    string title = 2;
-    optional string details = 3;
-    optional string createdBy = 4;
-    optional uint32 affectedUser = 5;
+    uint32 id = 1;
+    string details = 2;
+    optional string createdBy = 3;
 }
 
 message UpdateIncidentEvent {
     uint32 id = 1;
-    optional string title = 2;
-    optional string details = 3;
-    optional string createdBy = 4;
-    optional uint32 affectedUser = 5;
+    optional string details = 2;
 }

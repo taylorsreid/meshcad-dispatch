@@ -18,14 +18,14 @@ message IncidentUser {
 }
 
 message CreateIncident {
-    optional uint32 id = 1;
+    uint32 id = 1;
     string incidentType = 2;
-    optional uint32 priority = 3;
-    optional double latitude = 4;
-    optional double longitude = 5;
-    optional string address = 6;
-    optional string voiceChannel = 7;
-    optional string createdBy = 8;
+    string createdBy = 3;
+    uint32 priority = 4;
+    optional double latitude = 5;
+    optional double longitude = 6;
+    optional string address = 7;
+    optional string voiceChannel = 8;
     repeated IncidentUser incidentUsers = 9;
 }
 

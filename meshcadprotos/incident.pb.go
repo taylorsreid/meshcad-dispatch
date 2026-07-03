@@ -143,14 +143,14 @@ func (x *IncidentUser) GetRole() string {
 
 type CreateIncident struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            *uint32                `protobuf:"varint,1,opt,name=id,proto3,oneof" json:"id,omitempty"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	IncidentType  string                 `protobuf:"bytes,2,opt,name=incidentType,proto3" json:"incidentType,omitempty"`
-	Priority      *uint32                `protobuf:"varint,3,opt,name=priority,proto3,oneof" json:"priority,omitempty"`
-	Latitude      *float64               `protobuf:"fixed64,4,opt,name=latitude,proto3,oneof" json:"latitude,omitempty"`
-	Longitude     *float64               `protobuf:"fixed64,5,opt,name=longitude,proto3,oneof" json:"longitude,omitempty"`
-	Address       *string                `protobuf:"bytes,6,opt,name=address,proto3,oneof" json:"address,omitempty"`
-	VoiceChannel  *string                `protobuf:"bytes,7,opt,name=voiceChannel,proto3,oneof" json:"voiceChannel,omitempty"`
-	CreatedBy     *string                `protobuf:"bytes,8,opt,name=createdBy,proto3,oneof" json:"createdBy,omitempty"`
+	CreatedBy     string                 `protobuf:"bytes,3,opt,name=createdBy,proto3" json:"createdBy,omitempty"`
+	Priority      uint32                 `protobuf:"varint,4,opt,name=priority,proto3" json:"priority,omitempty"`
+	Latitude      *float64               `protobuf:"fixed64,5,opt,name=latitude,proto3,oneof" json:"latitude,omitempty"`
+	Longitude     *float64               `protobuf:"fixed64,6,opt,name=longitude,proto3,oneof" json:"longitude,omitempty"`
+	Address       *string                `protobuf:"bytes,7,opt,name=address,proto3,oneof" json:"address,omitempty"`
+	VoiceChannel  *string                `protobuf:"bytes,8,opt,name=voiceChannel,proto3,oneof" json:"voiceChannel,omitempty"`
 	IncidentUsers []*IncidentUser        `protobuf:"bytes,9,rep,name=incidentUsers,proto3" json:"incidentUsers,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -187,8 +187,8 @@ func (*CreateIncident) Descriptor() ([]byte, []int) {
 }
 
 func (x *CreateIncident) GetId() uint32 {
-	if x != nil && x.Id != nil {
-		return *x.Id
+	if x != nil {
+		return x.Id
 	}
 	return 0
 }
@@ -200,9 +200,16 @@ func (x *CreateIncident) GetIncidentType() string {
 	return ""
 }
 
+func (x *CreateIncident) GetCreatedBy() string {
+	if x != nil {
+		return x.CreatedBy
+	}
+	return ""
+}
+
 func (x *CreateIncident) GetPriority() uint32 {
-	if x != nil && x.Priority != nil {
-		return *x.Priority
+	if x != nil {
+		return x.Priority
 	}
 	return 0
 }
@@ -231,13 +238,6 @@ func (x *CreateIncident) GetAddress() string {
 func (x *CreateIncident) GetVoiceChannel() string {
 	if x != nil && x.VoiceChannel != nil {
 		return *x.VoiceChannel
-	}
-	return ""
-}
-
-func (x *CreateIncident) GetCreatedBy() string {
-	if x != nil && x.CreatedBy != nil {
-		return *x.CreatedBy
 	}
 	return ""
 }
@@ -366,27 +366,23 @@ const file_incident_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x12 \n" +
 	"\vmeshAddress\x18\x02 \x01(\rR\vmeshAddress\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12\x12\n" +
-	"\x04role\x18\x04 \x01(\tR\x04role\"\xa8\x03\n" +
-	"\x0eCreateIncident\x12\x13\n" +
-	"\x02id\x18\x01 \x01(\rH\x00R\x02id\x88\x01\x01\x12\"\n" +
-	"\fincidentType\x18\x02 \x01(\tR\fincidentType\x12\x1f\n" +
-	"\bpriority\x18\x03 \x01(\rH\x01R\bpriority\x88\x01\x01\x12\x1f\n" +
-	"\blatitude\x18\x04 \x01(\x01H\x02R\blatitude\x88\x01\x01\x12!\n" +
-	"\tlongitude\x18\x05 \x01(\x01H\x03R\tlongitude\x88\x01\x01\x12\x1d\n" +
-	"\aaddress\x18\x06 \x01(\tH\x04R\aaddress\x88\x01\x01\x12'\n" +
-	"\fvoiceChannel\x18\a \x01(\tH\x05R\fvoiceChannel\x88\x01\x01\x12!\n" +
-	"\tcreatedBy\x18\b \x01(\tH\x06R\tcreatedBy\x88\x01\x01\x123\n" +
-	"\rincidentUsers\x18\t \x03(\v2\r.IncidentUserR\rincidentUsersB\x05\n" +
-	"\x03_idB\v\n" +
-	"\t_priorityB\v\n" +
+	"\x04role\x18\x04 \x01(\tR\x04role\"\xf7\x02\n" +
+	"\x0eCreateIncident\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\rR\x02id\x12\"\n" +
+	"\fincidentType\x18\x02 \x01(\tR\fincidentType\x12\x1c\n" +
+	"\tcreatedBy\x18\x03 \x01(\tR\tcreatedBy\x12\x1a\n" +
+	"\bpriority\x18\x04 \x01(\rR\bpriority\x12\x1f\n" +
+	"\blatitude\x18\x05 \x01(\x01H\x00R\blatitude\x88\x01\x01\x12!\n" +
+	"\tlongitude\x18\x06 \x01(\x01H\x01R\tlongitude\x88\x01\x01\x12\x1d\n" +
+	"\aaddress\x18\a \x01(\tH\x02R\aaddress\x88\x01\x01\x12'\n" +
+	"\fvoiceChannel\x18\b \x01(\tH\x03R\fvoiceChannel\x88\x01\x01\x123\n" +
+	"\rincidentUsers\x18\t \x03(\v2\r.IncidentUserR\rincidentUsersB\v\n" +
 	"\t_latitudeB\f\n" +
 	"\n" +
 	"_longitudeB\n" +
 	"\n" +
 	"\b_addressB\x0f\n" +
-	"\r_voiceChannelB\f\n" +
-	"\n" +
-	"_createdBy\"\xe2\x03\n" +
+	"\r_voiceChannel\"\xe2\x03\n" +
 	"\x0eUpdateIncident\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x12'\n" +
 	"\fincidentType\x18\x02 \x01(\tH\x00R\fincidentType\x88\x01\x01\x12\x1f\n" +

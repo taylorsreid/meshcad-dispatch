@@ -1,11 +1,13 @@
 import { betterAuth } from "better-auth";
 import { sveltekitCookies } from "better-auth/svelte-kit";
 import { getRequestEvent } from "$app/server";
-import { Database } from "bun:sqlite";
 import { db, type tablesWithPermissions } from "./db";
 
 export const auth = betterAuth({
-    database: new Database("db.sqlite"),
+    database: {
+        db,
+        type: "postgres",
+    },
 	advanced: {
 		database: {
 			generateId: "serial"
@@ -31,12 +33,9 @@ export const auth = betterAuth({
 			last_name: {
 				type: "string"
 			},
-			latitude: {
-				type: "number"
-			},
-			longitude: {
-				type: "number"
-			}
+			location: {
+                type: "json"
+            }
 		}
     },
     session: {
@@ -73,14 +72,12 @@ export const auth = betterAuth({
 })
 
 export async function userHasPermissionTo(userId: number, action: "create" | "read" | "update" | "delete", tableName: typeof tablesWithPermissions[number]) {
-	// const q = await db.selectFrom("permission").select("name")
-	return db.selectFrom("permission")
+	return typeof (await db.selectFrom("permission")
 	.innerJoin("role_has_permission", "permission.id", "role_has_permission.permission_id")
 	.innerJoin("role", "role_has_permission.role_id", "role.id")
 	.innerJoin("user_has_role", "role.id", "user_has_role.role_id")
 	.innerJoin("user", "user_has_role.user_id", "user.id")
-	.selectAll()
-	.where("name", "=", action + " " + tableName)
+	.select("permission.id")
+	.where("permission.name", "=", action + " " + tableName)
+    .executeTakeFirst()) !== "undefined"
 }
-
-console.log(userHasPermissionTo(1, "create", "user"))

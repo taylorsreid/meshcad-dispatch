@@ -1,21 +1,24 @@
-import { Kysely, type Generated } from 'kysely';
-import { BunSqliteDialect } from 'kysely-bun-sqlite';
-import { Database } from "bun:sqlite";
+import { PGlite } from '@electric-sql/pglite';
+import { postgis } from '@electric-sql/pglite-postgis'
+import { Kysely, type Generated, PGliteDialect } from 'kysely';
 
 export const db = new Kysely<KyselyDatabase>({
-    dialect: new BunSqliteDialect({
-        database: new Database('db.sqlite'),
-    }),
+    dialect: new PGliteDialect({
+        pglite: new PGlite("./pglite", {
+            extensions: {
+                postgis
+            }
+        })
+    })
 });
 
-export const tablesWithPermissions = ["user", "role", "status", "unit", "voice_channel", "incident_type", "incident", "incident_log", "suggested_incident_log"] as const
+export const tablesWithPermissions = ["setting", "user", "role", "status", "unit", "voice_channel", "incident_type", "incident", "incident_log", "suggested_incident_log"] as const
 
 interface UserTable {
     id: Generated<number>
     first_name: string
     last_name: string
-    latitude: number | null
-    longitude: number | null
+    location: string | null
     email: string // unique
     email_verified: number
     image: string
@@ -27,6 +30,11 @@ interface UserTable {
 interface PermissionTable {
     id: Generated<number>
     name: string // unique
+}
+
+export interface SettingTable {
+    key: string
+    value: string | null
 }
 
 interface RoleTable {
@@ -127,6 +135,7 @@ interface IncidentTypeHasSuggestedIncidentLogTable {
 
 export interface KyselyDatabase {
     // direct tables
+    setting: SettingTable
     user: UserTable
     permission: PermissionTable
     role: RoleTable
@@ -140,8 +149,8 @@ export interface KyselyDatabase {
 
     // pivot tables
     role_has_permission: RoleHasPermissionTable
-    user_has_role: UserHasRoleTable    
+    user_has_role: UserHasRoleTable
     incident_type_has_voice_channel: IncidentTypeHasVoiceChannelTable
-    incident_type_has_role: IncidentTypeHasRoleTable    
+    incident_type_has_role: IncidentTypeHasRoleTable
     incident_type_has_suggested_incident_log: IncidentTypeHasSuggestedIncidentLogTable
 }

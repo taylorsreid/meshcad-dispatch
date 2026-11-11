@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+message CreateIncidentEvent {
+    uint32 id = 1;
+    string details = 2;
+    optional string createdBy = 3;
+}
+
+message UpdateIncidentEvent {
+    uint32 id = 1;
+    optional string details = 2;
+}

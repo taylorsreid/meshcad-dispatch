@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+message CreateUser {
+    string email = 1;
+    string password = 2;
+    string first_name = 3;
+    string last_name = 4;
+}
+
+message UpdateUser {
+    uint32 id = 1;
+    optional string email = 2;
+    optional string password = 3;
+    optional string name = 4;
+    optional string status = 5;
+}
+
+message AuthorizeUser {
+    string email = 1;
+    string password = 2;
+}

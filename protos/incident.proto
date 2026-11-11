@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+enum AssignmentModifier {
+    unknown_assignmentModifier = 0;
+    set = 1;
+    add = 2;
+    remove = 3;
+}
+
+message IncidentUser {
+    uint32 id = 1;
+    uint32 meshAddress = 2;
+    string name = 3;
+    string role = 4;
+}
+
+message CreateIncident {
+    uint32 id = 1;
+    string incidentType = 2;
+    string createdBy = 3;
+    uint32 priority = 4;
+    optional double latitude = 5;
+    optional double longitude = 6;
+    optional string address = 7;
+    optional string voiceChannel = 8;
+    repeated IncidentUser incidentUsers = 9;
+}
+
+message UpdateIncident {
+    uint32 id = 1;
+    optional string incidentType = 2;
+    optional uint32 priority = 3;
+    optional double latitude = 4;
+    optional double longitude = 5;
+    optional string address = 6;
+    optional string voiceChannel = 7;
+    optional AssignmentModifier assignmentModifier = 8;
+    repeated IncidentUser incidentUsers = 9;
+}

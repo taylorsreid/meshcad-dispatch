@@ -27,6 +27,7 @@ export class BundlerMigrationProvider implements MigrationProvider {
                         .addColumn("id", "serial", c => c.notNull().primaryKey())
                         .addColumn("name", "text", c => c.notNull().unique())
                         .addColumn("image", "text")
+                        .addColumn("redirect_slug", "text")
                         .addColumn("system", "boolean", c => c.notNull().defaultTo(false))
                         .execute()
 
@@ -104,7 +105,9 @@ export class BundlerMigrationProvider implements MigrationProvider {
                     await db.schema.createTable("user_has_role")
                         .addColumn("user_id", "integer", c => c.notNull().references("user.id"))
                         .addColumn("role_id", "integer", c => c.notNull().references("role.id"))
+                        .addColumn("selected", "boolean")
                         .addUniqueConstraint("user_has_role_unique", ["user_id", "role_id"])
+                        .addUniqueConstraint("user_has_role_selected", ["user_id", "selected"])
                         .execute()
 
                     await db.schema.createTable("incident_type_has_voice_channel")
@@ -125,7 +128,7 @@ export class BundlerMigrationProvider implements MigrationProvider {
                         .addUniqueConstraint("incident_type_has_suggested_incident_log_unique", ["incident_type_id", "suggested_incident_log_id"])
                         .execute()
 
-                        const allPermissionIds: {id: number}[] = []
+                    const allPermissionIds: { id: number }[] = []
                     for (let i = 0; i < tablesWithPermissions.length; i++) {
                         allPermissionIds.push(...await db.insertInto("permission").values([
                             { name: `create ${tablesWithPermissions[i]}` },
@@ -151,8 +154,6 @@ export class BundlerMigrationProvider implements MigrationProvider {
                             system: true
                         }).execute()
                     }
-
-                    // console.log(await db.selectFrom("role_has_permission").selectAll().execute())
 
                 },
                 async down(db: Kysely<any>): Promise<void> {

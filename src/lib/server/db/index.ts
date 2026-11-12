@@ -24,7 +24,7 @@ interface UserTable {
     location: string | null
     email: string // unique
     email_verified: number
-    image: string
+    image: string | null
     created_at: Date // not generated because better auth handles this
     updated_at: Date
     unit_id: number
@@ -45,6 +45,7 @@ export interface RoleTable {
     id: Generated<number>
     name: string // unique
     image: string
+    redirect_slug: string | null
     system: boolean // when true, record cannot be deleted
 }
 
@@ -59,6 +60,7 @@ interface UserHasRoleTable {
     // composite unique on user_id and role_id
     user_id: number // FK UserTable
     role_id: number // FK RoleTable
+    selected: true | null
 }
 
 interface StatusTable {
@@ -75,7 +77,6 @@ export interface UnitTable {
     data_address: string | null // unique
     status_id: number // FK StatusTable
     role_id: number // FK RoleTable
-    // user_id: number | null // FK UserTable, unique if not null
     incident_id: number | null
 }
 

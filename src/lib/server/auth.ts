@@ -7,6 +7,7 @@ export const auth = betterAuth({
     baseURL: {
         allowedHosts: ["*"] // this is designed to run locally
     },
+    trustedOrigins: ["http://localhost:*"],
     database: {
         db,
         type: "postgres",

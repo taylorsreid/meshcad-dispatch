@@ -1,4 +1,4 @@
-import { db, type RoleTable, type tablesWithPermissions, type UnitTable } from "$lib/server/db";
+import { db, type tablesWithPermissions, type UnitTable } from "$lib/server/db";
 import type { Selectable } from "kysely";
 
 export async function userHasPermissionTo(userOrId: { id: string } | number, action: "create" | "read" | "update" | "delete", tableName: typeof tablesWithPermissions[number]) {
@@ -32,10 +32,14 @@ export async function userHasRole(userOrId: { id: string } | number, roleName: s
 //         .execute()
 // }
 
-export async function getUsersUnit(userOrId: { id: string } | number): Promise<Selectable<UnitTable> | undefined> {
+export async function userGetUnit(userOrId: { id: string } | number): Promise<Selectable<UnitTable> | undefined> {
     return db.selectFrom("unit")
         .innerJoin("user", "user.unit_id", "unit.id")
         .selectAll()
         .where("user.id", "=", typeof userOrId === "number" ? userOrId : parseInt(userOrId.id))
         .executeTakeFirst()
+}
+
+export async function userGetTotalCount(): Promise<number> {
+    return (await db.selectFrom("user").select(eb => eb.fn.countAll<number>().as("count")).executeTakeFirstOrThrow()).count
 }

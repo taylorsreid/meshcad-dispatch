@@ -1,27 +1,31 @@
 <script lang="ts">
-    import { enhance } from "$app/forms";
 	import Intro from "$lib/components/intro.svelte";
-    import type { PageProps } from "../$types";
+	import type { PageProps } from "./$types";
+	import { TextField, Checkbox, Button } from "svelte-ux"
 
 	let { form }: PageProps = $props();
-	// let { form }: { form: ActionData } = $props();
 </script>
 
 <Intro>
-	<form method="POST" action="?/login" use:enhance>
-		<label>
-			Email
-			<input name="email" type="email" />
-		</label>
-		<br />
-		<label>
-			Password
-			<input name="password" type="password" />
-		</label>
-		<br />
-		<button>Log in</button>
-		<button>Register</button>
-		{#if form?.error}<div style="color: red; text-align: center; font-size: smaller;">{form?.error}</div>{/if}
+	<form method="POST" class="grid gap-2">
+		<TextField
+			label="Email"
+			name="email"
+			required
+		/>
+
+		<TextField
+			label="Password"
+			type="password"
+			name="password"
+			required
+		/>
+
+		<Checkbox checked name="remember_me">Remember me?</Checkbox>
+        <Button type="submit">Login</Button>
+		
+		{#if form}
+			<div class="text-center text-red-600">{form}</div>
+		{/if}
 	</form>
-	
 </Intro>

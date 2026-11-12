@@ -3,13 +3,14 @@
 	import { goto } from "$app/navigation";
     import { authClient } from "$lib/auth-client";
     import SquareArrowRightExit from "@lucide/svelte/icons/square-arrow-right-exit";
+    import User from "@lucide/svelte/icons/user"
     import UserRound from "@lucide/svelte/icons/user-round";
     import { Avatar, Button, Menu, MenuItem, Toggle } from "svelte-ux";
 
 </script>
 
 <div class="flex justify-end items-center">
-    <Button href="/app" title="Role Switcher">{data.user.roles.find((r) => r.selected)?.name}</Button>
+    <Button href="/app/select-role" title="Change Role">{data.user.roles.find((r) => r.selected)?.name}</Button>
     <Toggle let:on={open} let:toggle let:toggleOff>
         <Button on:click={toggle}>
             {#if data.user.image}
@@ -19,15 +20,23 @@
             {/if}
             <Menu {open} on:close={toggleOff}>
                 <MenuItem disabled>{data.user.first_name} {data.user.last_name}</MenuItem>
-                <MenuItem>Profile</MenuItem>
+                <MenuItem
+                    on:click={() => {
+                        // TODO:
+                        alert("Profile coming soon.")
+                    }}
+                >
+                    <User />
+                    Profile
+                </MenuItem>
                 <MenuItem
                     on:click={() => {
                         authClient.signOut();
                         goto("/login");
                     }}
                 >
-                    Logout
                     <SquareArrowRightExit />
+                    Logout
                 </MenuItem>
             </Menu>
         </Button>

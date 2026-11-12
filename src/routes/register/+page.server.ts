@@ -8,9 +8,9 @@ import { APIError } from "better-auth";
 export const load: PageServerLoad = async ({ setHeaders, locals }) => {
     // prevent back button from reloading page without redirecting
     setHeaders({
-        'cache-control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-        'pragma': 'no-cache',
-        'expires': '0'
+        'Cache-control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
     });
 
     // if already logged in, redirect

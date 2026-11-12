@@ -21,7 +21,8 @@
 			required
 		/>
 
-		<Checkbox checked name="remember_me">Remember me?</Checkbox>
+		<!-- make sure to include classes={{ input: "appearance-auto" }} or the two component libs will conflict -->
+		<Checkbox checked name="remember_me" classes={{ input: "appearance-auto" }}>Remember me?</Checkbox>
         <Button type="submit">Login</Button>
 		
 		{#if form}

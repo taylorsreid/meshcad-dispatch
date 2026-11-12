@@ -142,6 +142,7 @@ export class BundlerMigrationProvider implements MigrationProvider {
 
                     const adminId: number = (await db.insertInto("role").values({
                         name: "Administrator",
+                        redirect_slug: "/admin",
                         system: true
                     })
                     .returning("id")

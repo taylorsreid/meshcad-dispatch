@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { TextField, Checkbox, Button } from "svelte-ux";
-    import type { PageProps } from "./$types";
-    import "@fontsource/audiowide/400.css";
     import Intro from "$lib/components/intro.svelte";
+    import "@fontsource/audiowide/400.css";
+    import { Button, Checkbox, TextField } from "svelte-ux";
+    import type { PageProps } from "./$types";
     let { form, data }: PageProps = $props();
     let password: string = $state("");
     let confirmPassword: string = $state("");
@@ -62,7 +62,7 @@
                 if (form?.lastNameMissing) return "Last Name is required.";
             })()}
         />
-        <Checkbox checked name="remember_me">Remember me?</Checkbox>
+        <Checkbox checked name="remember_me" classes={{ input: "appearance-auto" }}>Remember me?</Checkbox>
         <Button
             disabled={password !== confirmPassword}
             type="submit"

@@ -1,6 +1,20 @@
 import { auth } from '$lib/server/auth';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { APIError } from 'better-auth';
+import type { PageServerLoad } from './$types';
+
+export const load: PageServerLoad = ({ setHeaders, locals }) => {
+    // prevent back button from reloading page without redirecting
+    setHeaders({
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+    });
+
+    if (locals.user) {
+        redirect(307, "/app")
+    }
+};
 
 export const actions: Actions = {
     default: async ({ request }) => {
